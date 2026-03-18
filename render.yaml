@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: digilib
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:application --bind 0.0.0.0:$PORT --workers 2
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ADMIN_USERNAME
+        value: admin
+      - key: ADMIN_PASSWORD
+        value: admin123
+      - key: APP_URL
+        value: https://digilib.onrender.com
+      # Optional - add after getting Twilio credentials:
+      # - key: TWILIO_ACCOUNT_SID
+      #   value: ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+      # - key: TWILIO_AUTH_TOKEN
+      #   value: your_auth_token
+      # - key: TWILIO_WHATSAPP
+      #   value: whatsapp:+14155238886
+      # - key: FAST2SMS_API_KEY
+      #   value: your_fast2sms_key

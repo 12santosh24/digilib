@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Collect Renewal - SHIVA INFOTECH DIGITAL LIBRARY{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-lg-6">
+  <div class="lib-card">
+    <h4 class="lib-card-title mb-4"><i class="bi bi-cash-coin me-2"></i>Collect Monthly Renewal</h4>
+    <div class="student-summary mb-4">
+      <div class="d-flex gap-3 align-items-center">
+        <div class="student-avatar">{{ student.name[0].upper() }}</div>
+        <div><h5 class="mb-0">{{ student.name }}</h5>
+          <p class="text-muted mb-0">+91 {{ student.mobile }} | Month {{ reminder.month_number }}</p>
+          <p class="mb-0 small {% if reminder.is_overdue() %}text-danger{% else %}text-warning{% endif %}">Due: {{ reminder.due_date.strftime('%d %b %Y') }} {% if reminder.is_overdue() %}(OVERDUE){% endif %}</p>
+        </div>
+      </div>
+    </div>
+    <div class="fee-info-box mb-4">
+      <div class="fee-info-row"><span>Base Monthly Fee</span><strong>Rs.{{ student.base_fee() }}</strong></div>
+      <div class="fee-info-row"><span>Shifts</span><span>{{ student.num_shifts }} shift(s)</span></div>
+    </div>
+    <form method="POST">
+      <div class="row g-3">
+        <div class="col-md-6"><label class="form-label">Flat Discount (Rs.)</label><input type="number" name="discount" class="form-control lib-input" placeholder="0" min="0" max="{{ student.base_fee() }}" value="0" id="renewDisc" oninput="updateTotal()"></div>
+        <div class="col-md-6"><label class="form-label">Amount Payable</label><div class="fee-badge-large" id="renewTotal">Rs.{{ student.base_fee() }}</div></div>
+        <div class="col-12"><label class="form-label">Payment Mode *</label>
+          <div class="payment-mode-toggle">
+            <label class="mode-option active" id="rOff"><input type="radio" name="payment_mode" value="Offline" checked onchange="toggleRTxn()"><span><i class="bi bi-cash-coin me-2"></i>Offline (Cash)</span></label>
+            <label class="mode-option" id="rOn"><input type="radio" name="payment_mode" value="Online" onchange="toggleRTxn()"><span><i class="bi bi-phone me-2"></i>Online (UPI)</span></label>
+          </div>
+        </div>
+        <div class="col-12" id="rTxnDiv" style="display:none;"><label class="form-label">Transaction ID *</label><input type="text" name="transaction_id" class="form-control lib-input" id="rTxnField"></div>
+        <div class="col-12 d-flex gap-3">
+          <button type="submit" class="btn btn-success lib-btn px-5"><i class="bi bi-check-lg me-2"></i>Confirm</button>
+          <a href="{{ url_for('main.admin_reminders') }}" class="btn btn-outline-secondary px-4">Cancel</a>
+        </div>
+      </div>
+    </form>
+  </div>
+</div></div>
+{% endblock %}
+{% block scripts %}
+<script>
+const base = {{ student.base_fee() }};
+function updateTotal() { const d = parseFloat(document.getElementById('renewDisc').value)||0; document.getElementById('renewTotal').textContent = 'Rs.' + Math.max(0,base-d).toFixed(2); }
+function toggleRTxn() { const on = document.querySelector('input[name="payment_mode"][value="Online"]').checked; document.getElementById('rTxnDiv').style.display = on?'block':'none'; document.getElementById('rTxnField').required = on; document.getElementById('rOff').classList.toggle('active',!on); document.getElementById('rOn').classList.toggle('active',on); }
+</script>
+{% endblock %}

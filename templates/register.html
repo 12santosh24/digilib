@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block title %}Register Student - SHIVA INFOTECH DIGITAL LIBRARY{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="lib-card">
+      <h4 class="lib-card-title mb-4"><i class="bi bi-person-plus me-2"></i>Student Registration</h4>
+      <form method="POST" id="regForm">
+        <div class="form-section mb-4">
+          <div class="form-section-title">Personal Information</div>
+          <div class="row g-3">
+            <div class="col-md-6"><label class="form-label">Full Name *</label><input type="text" name="name" class="form-control lib-input" required></div>
+            <div class="col-md-6"><label class="form-label">Mobile Number *</label><div class="input-group"><span class="input-group-text">+91</span><input type="text" name="mobile" class="form-control lib-input" maxlength="10" pattern="[0-9]{10}" required></div></div>
+            <div class="col-md-6"><label class="form-label">Date of Birth *</label><input type="date" name="dob" class="form-control lib-input" required></div>
+            <div class="col-md-6"><label class="form-label">Number of Shifts *</label>
+              <select name="num_shifts" class="form-select lib-input" id="numShifts" required>
+                <option value="">Select shifts</option>
+                <option value="1">1 Shift - Rs.300</option>
+                <option value="2">2 Shifts - Rs.500</option>
+                <option value="3">3 Shifts - Rs.700</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="form-section mb-4" id="shiftSeatSection" style="display:none;">
+          <div class="form-section-title">Shift and Seat</div>
+          <div id="shiftSeatRows"></div>
+        </div>
+        <div class="form-section mb-4" id="feeSection" style="display:none;">
+          <div class="form-section-title">Discount</div>
+          <div class="fee-summary-bar mb-3" id="feeSummary"></div>
+          <div class="row g-3">
+            <div class="col-md-4"><label class="form-label">Discount Type</label>
+              <select name="discount_type" class="form-select lib-input" id="discountType">
+                <option value="none">No Discount</option><option value="percent">Percentage (%)</option><option value="flat">Flat Amount (Rs.)</option>
+              </select>
+            </div>
+            <div class="col-md-4" id="discountValueDiv" style="display:none;"><label class="form-label" id="discountValueLabel">Value</label><input type="number" name="discount_value" class="form-control lib-input" id="discountValue" min="0" step="0.01" placeholder="0"></div>
+            <div class="col-md-4" id="discountReasonDiv" style="display:none;"><label class="form-label">Reason</label><input type="text" name="discount_reason" class="form-control lib-input" placeholder="e.g. Student concession"></div>
+          </div>
+          <div class="fee-breakdown mt-3" id="feeBreakdown" style="display:none;">
+            <div class="fee-row"><span>Base Fee</span><span id="fbBase">Rs.0</span></div>
+            <div class="fee-row text-danger"><span>Discount</span><span id="fbDiscount">- Rs.0</span></div>
+            <div class="fee-row fee-total"><span>Amount Payable</span><span id="fbFinal">Rs.0</span></div>
+          </div>
+        </div>
+        <div class="form-section mb-4" id="paymentModeSection" style="display:none;">
+          <div class="form-section-title">Payment Mode</div>
+          <div class="row g-3 align-items-start">
+            <div class="col-md-5"><label class="form-label">Mode *</label>
+              <div class="payment-mode-toggle">
+                <label class="mode-option active" id="modeOffline"><input type="radio" name="payment_mode" value="Offline" checked onchange="toggleTxn()"><span><i class="bi bi-cash-coin me-2"></i>Offline (Cash)</span></label>
+                <label class="mode-option" id="modeOnline"><input type="radio" name="payment_mode" value="Online" onchange="toggleTxn()"><span><i class="bi bi-phone me-2"></i>Online (UPI)</span></label>
+              </div>
+            </div>
+            <div class="col-md-4" id="txnDiv" style="display:none;"><label class="form-label">Transaction ID *</label><input type="text" name="transaction_id" class="form-control lib-input" id="txnField" placeholder="UPI Ref / TXN ID"></div>
+            <div class="col-md-3"><label class="form-label">Collect Now?</label>
+              <div class="form-check mt-2"><input class="form-check-input" type="checkbox" name="mark_paid" value="1" id="markPaid"><label class="form-check-label" for="markPaid">Mark as <strong>Paid</strong> immediately</label></div>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex gap-3 flex-wrap">
+          <button type="submit" class="btn btn-primary lib-btn px-5"><i class="bi bi-check-lg me-2"></i>Register Student</button>
+          <a href="{{ url_for('main.index') }}" class="btn btn-outline-secondary px-4">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="lib-card mb-3">
+      <h6 class="lib-card-title"><i class="bi bi-clock me-2"></i>Shifts</h6>
+      {% for shift in shifts %}<div class="shift-info-item"><span class="shift-badge">{{ shift.shift_number }}</span><div><strong>{{ shift.name }}</strong><div class="text-muted small">{{ shift.start_time }} - {{ shift.end_time }}</div></div></div>{% endfor %}
+    </div>
+    <div class="lib-card mb-3">
+      <h6 class="lib-card-title"><i class="bi bi-currency-rupee me-2"></i>Fee Structure</h6>
+      <table class="table table-sm mb-0"><tr><td>1 Shift</td><td class="fw-bold text-success">Rs.300</td></tr><tr><td>2 Shifts</td><td class="fw-bold text-success">Rs.500</td></tr><tr><td>3 Shifts</td><td class="fw-bold text-success">Rs.700</td></tr></table>
+    </div>
+    <div class="lib-card">
+      <h6 class="lib-card-title"><i class="bi bi-whatsapp me-2"></i>Auto Notification</h6>
+      <p class="text-muted small mb-0">WhatsApp and SMS confirmation is sent automatically to the student's mobile after registration (if configured).</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+const shiftData = [{id:1,name:"1st Shift",time:"6:00 AM - 11:00 AM"},{id:2,name:"2nd Shift",time:"11:00 AM - 4:00 PM"},{id:3,name:"3rd Shift",time:"4:00 PM - 9:00 PM"}];
+const fees = {1:300,2:500,3:700};
+document.getElementById('numShifts').addEventListener('change', function() {
+  const n = parseInt(this.value);
+  ['shiftSeatSection','feeSection','paymentModeSection'].forEach(id => document.getElementById(id).style.display = n ? 'block' : 'none');
+  if (!n) return;
+  let html = '';
+  for (let i = 0; i < n; i++) {
+    html += '<div class="row g-3 mb-3"><div class="col-md-7"><label class="form-label">Shift ' + (i+1) + '</label><select name="shift_ids" class="form-select lib-input" required><option value="">Choose shift</option>' + shiftData.map(s => '<option value="'+s.id+'">'+s.name+' ('+s.time+')</option>').join('') + '</select></div><div class="col-md-5"><label class="form-label">Seat (1-92)</label><input type="number" name="seat_numbers" class="form-control lib-input" placeholder="e.g. 15" min="1" max="92" required></div></div>';
+  }
+  document.getElementById('shiftSeatRows').innerHTML = html;
+  updateFee();
+});
+document.getElementById('discountType').addEventListener('change', function() {
+  const show = this.value !== 'none';
+  document.getElementById('discountValueDiv').style.display = show ? 'block' : 'none';
+  document.getElementById('discountReasonDiv').style.display = show ? 'block' : 'none';
+  document.getElementById('feeBreakdown').style.display = show ? 'block' : 'none';
+  document.getElementById('discountValueLabel').textContent = this.value === 'percent' ? 'Discount (%)' : 'Discount (Rs.)';
+  updateFee();
+});
+document.addEventListener('input', e => { if (e.target.id === 'discountValue') updateFee(); });
+function updateFee() {
+  const n = parseInt(document.getElementById('numShifts').value); if (!n) return;
+  const base = fees[n] || 0, dtype = document.getElementById('discountType').value, dval = parseFloat(document.getElementById('discountValue')?.value||0);
+  let disc = dtype==='percent' ? Math.round(base*dval/100*100)/100 : dtype==='flat' ? Math.min(dval,base) : 0;
+  const final = Math.max(0, base - disc);
+  document.getElementById('feeSummary').innerHTML = '<div class="d-flex justify-content-between align-items-center"><span>Base: <strong>Rs.'+base+'</strong></span>'+(disc>0?'<span class="text-danger">Discount: -Rs.'+disc.toFixed(2)+'</span>':'')+'<span class="fee-badge-inline">Payable: Rs.'+final.toFixed(2)+'</span></div>';
+  document.getElementById('fbBase').textContent = 'Rs.'+base;
+  document.getElementById('fbDiscount').textContent = '- Rs.'+disc.toFixed(2);
+  document.getElementById('fbFinal').textContent = 'Rs.'+final.toFixed(2);
+}
+function toggleTxn() {
+  const online = document.querySelector('input[name="payment_mode"][value="Online"]').checked;
+  document.getElementById('txnDiv').style.display = online ? 'block' : 'none';
+  document.getElementById('txnField').required = online;
+  document.getElementById('modeOffline').classList.toggle('active', !online);
+  document.getElementById('modeOnline').classList.toggle('active', online);
+}
+</script>
+{% endblock %}

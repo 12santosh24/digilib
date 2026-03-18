@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - SHIVA INFOTECH DIGITAL LIBRARY{% endblock %}
+{% block content %}
+<div class="lib-hero mb-5">
+  <div class="row align-items-center">
+    <div class="col-lg-7">
+      <p class="hero-sub mb-2">SHIVA INFOTECH DIGITAL LIBRARY</p>
+      <h1 class="hero-title">Welcome to<br><span class="accent">SHIVA INFOTECH DIGITAL LIBRARY</span></h1>
+      <p class="hero-desc">Manage seats, shifts, and students with ease. Open daily 6:00 AM to 9:00 PM.</p>
+      <div class="d-flex gap-3 mt-4 flex-wrap">
+        <a href="{{ url_for('main.register') }}" class="btn btn-primary btn-lg lib-btn"><i class="bi bi-person-plus me-2"></i>Register Student</a>
+        <a href="{{ url_for('main.seats') }}" class="btn btn-outline-light btn-lg"><i class="bi bi-grid-3x3 me-2"></i>View Seats</a>
+      </div>
+    </div>
+    <div class="col-lg-5 d-none d-lg-flex justify-content-end">
+      <div class="hero-illustration"><i class="bi bi-building-fill"></i></div>
+    </div>
+  </div>
+</div>
+<div class="row g-4 mb-5">
+  <div class="col-6 col-md-4 col-lg-2"><div class="stat-card stat-blue"><div class="stat-icon"><i class="bi bi-grid-3x3"></i></div><div class="stat-value">{{ stats.total_seats }}</div><div class="stat-label">Total Seats</div></div></div>
+  <div class="col-6 col-md-4 col-lg-2"><div class="stat-card stat-red"><div class="stat-icon"><i class="bi bi-person-fill-slash"></i></div><div class="stat-value">{{ stats.occupied }}</div><div class="stat-label">Bookings</div></div></div>
+  <div class="col-6 col-md-4 col-lg-2"><div class="stat-card stat-green"><div class="stat-icon"><i class="bi bi-check-circle-fill"></i></div><div class="stat-value">{{ stats.available }}</div><div class="stat-label">Available</div></div></div>
+  <div class="col-6 col-md-4 col-lg-2"><div class="stat-card stat-purple"><div class="stat-icon"><i class="bi bi-people-fill"></i></div><div class="stat-value">{{ stats.total_students }}</div><div class="stat-label">Students</div></div></div>
+  <div class="col-6 col-md-4 col-lg-2"><div class="stat-card stat-amber"><div class="stat-icon"><i class="bi bi-cash-stack"></i></div><div class="stat-value">Rs.{{ stats.total_revenue|int }}</div><div class="stat-label">Revenue</div></div></div>
+  <div class="col-6 col-md-4 col-lg-2"><div class="stat-card stat-teal"><div class="stat-icon"><i class="bi bi-bell"></i></div><div class="stat-value">{{ stats.pending_reminders }}</div><div class="stat-label">Pending Fees</div></div></div>
+</div>
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="lib-card">
+      <h5 class="lib-card-title"><i class="bi bi-clock-history me-2"></i>Shift Occupancy</h5>
+      {% for s in stats.shift_stats %}
+      <div class="shift-row">
+        <div class="shift-label"><span class="shift-name">{{ s.name }}</span><span class="shift-time text-muted">{{ s.time }}</span></div>
+        <div class="shift-bar-wrap"><div class="progress lib-progress"><div class="progress-bar {% if s.percent > 75 %}bg-danger{% elif s.percent > 40 %}bg-warning{% else %}bg-success{% endif %}" style="width:{{ s.percent }}%"></div></div></div>
+        <div class="shift-stats"><span class="badge-occupied">{{ s.occupied }} Occ</span><span class="badge-avail">{{ s.available }} Free</span></div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="lib-card">
+      <h5 class="lib-card-title"><i class="bi bi-info-circle me-2"></i>Library Info</h5>
+      <ul class="info-list">
+        <li><i class="bi bi-door-open text-success"></i>Opens <strong>6:00 AM</strong></li>
+        <li><i class="bi bi-door-closed text-danger"></i>Closes <strong>9:00 PM</strong></li>
+        <li><i class="bi bi-layout-three-columns text-primary"></i><strong>3 Shifts</strong> daily</li>
+        <li><i class="bi bi-grid text-warning"></i><strong>92 Seats</strong> total</li>
+        <li><hr class="my-2"></li>
+        <li><i class="bi bi-currency-rupee text-success"></i>1 Shift: <strong>Rs.300</strong></li>
+        <li><i class="bi bi-currency-rupee text-success"></i>2 Shifts: <strong>Rs.500</strong></li>
+        <li><i class="bi bi-currency-rupee text-success"></i>3 Shifts: <strong>Rs.700</strong></li>
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Students - SHIVA INFOTECH DIGITAL LIBRARY{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <h4 class="lib-page-title"><i class="bi bi-people me-2"></i>All Students</h4>
+  <div class="d-flex gap-2 flex-wrap">
+    <a href="{{ url_for('main.export_excel') }}" class="btn btn-success btn-sm"><i class="bi bi-file-earmark-excel me-1"></i>Export</a>
+    <a href="{{ url_for('main.register') }}" class="btn btn-primary btn-sm lib-btn"><i class="bi bi-person-plus me-1"></i>Add</a>
+  </div>
+</div>
+<div class="lib-card mb-3">
+  <form method="GET" class="d-flex gap-2">
+    <input type="text" name="q" class="form-control lib-input" placeholder="Search by name or mobile..." value="{{ q }}">
+    <button type="submit" class="btn btn-primary lib-btn px-4"><i class="bi bi-search"></i></button>
+    {% if q %}<a href="{{ url_for('main.admin_students') }}" class="btn btn-outline-secondary"><i class="bi bi-x"></i></a>{% endif %}
+  </form>
+</div>
+<div class="lib-card p-0">
+  <div class="table-responsive">
+    <table class="table lib-table mb-0">
+      <thead><tr><th>#</th><th>Name</th><th>Mobile</th><th>Bookings</th><th>Base</th><th>Discount</th><th>Final</th><th>Mode</th><th>Status</th><th>Receipt</th><th>Actions</th></tr></thead>
+      <tbody>
+        {% for s in students %}
+        {% set p = s.payment %}
+        <tr>
+          <td>{{ s.id }}</td>
+          <td><strong>{{ s.name }}</strong><div class="text-muted small">{{ s.registered_at.strftime('%d %b %Y') }}</div></td>
+          <td>+91 {{ s.mobile }}</td>
+          <td>{% for b in s.bookings %}{% if b.is_active %}<span class="badge bg-secondary me-1">{{ b.shift.name }} S{{ b.seat.seat_number }}</span>{% endif %}{% endfor %}</td>
+          <td>Rs.{{ s.base_fee() }}</td>
+          <td>{% if p and p.discount_amount > 0 %}<span class="badge bg-info text-dark">{{ p.discount_display() }}</span>{% else %}<span class="text-muted">-</span>{% endif %}</td>
+          <td><strong>Rs.{{ p.final_amount|round(2) if p else s.base_fee() }}</strong></td>
+          <td>{% if p %}<span class="badge {% if p.payment_mode=='Online' %}bg-primary{% else %}bg-secondary{% endif %}"><i class="bi bi-{% if p.payment_mode=='Online' %}phone{% else %}cash{% endif %} me-1"></i>{{ p.payment_mode }}</span>{% endif %}</td>
+          <td>{% if p %}<span class="badge {% if p.status=='Paid' %}bg-success{% else %}bg-danger{% endif %}">{{ p.status }}</span>{% endif %}</td>
+          <td><small class="font-monospace">{{ p.receipt_number if p else '-' }}</small></td>
+          <td>
+            <div class="d-flex gap-1 flex-wrap">
+              {% if p and p.status=='Unpaid' %}<form method="POST" action="{{ url_for('main.update_payment', student_id=s.id) }}" class="d-inline"><button class="btn btn-xs btn-success" onclick="return confirm('Mark Paid?')" title="Mark Paid"><i class="bi bi-check-lg"></i></button></form>{% endif %}
+              <a href="{{ url_for('main.edit_payment', student_id=s.id) }}" class="btn btn-xs btn-warning" title="Edit"><i class="bi bi-pencil"></i></a>
+              <a href="{{ url_for('main.receipt', student_id=s.id) }}" class="btn btn-xs btn-info" title="Receipt"><i class="bi bi-receipt"></i></a>
+              <form method="POST" action="{{ url_for('main.delete_student', sid=s.id) }}" class="d-inline"><button class="btn btn-xs btn-danger" onclick="return confirm('Delete {{ s.name }}?')" title="Delete"><i class="bi bi-trash"></i></button></form>
+            </div>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="11" class="text-center text-muted py-4">No students found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

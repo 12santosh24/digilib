@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Edit Payment - SHIVA INFOTECH DIGITAL LIBRARY{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-lg-7">
+  <div class="lib-card">
+    <h4 class="lib-card-title mb-4"><i class="bi bi-pencil-square me-2"></i>Edit Payment</h4>
+    <div class="student-summary mb-4">
+      <div class="d-flex gap-3 align-items-center">
+        <div class="student-avatar">{{ student.name[0].upper() }}</div>
+        <div><h5 class="mb-0">{{ student.name }}</h5><p class="text-muted mb-0">{{ student.mobile }} | {{ payment.receipt_number }}</p></div>
+      </div>
+    </div>
+    <form method="POST">
+      <div class="row g-3">
+        <div class="col-md-4"><label class="form-label">Discount Type</label>
+          <select name="discount_type" class="form-select lib-input" id="edt" onchange="toggleED()">
+            <option value="none" {% if payment.discount_type=='none' %}selected{% endif %}>No Discount</option>
+            <option value="percent" {% if payment.discount_type=='percent' %}selected{% endif %}>Percentage</option>
+            <option value="flat" {% if payment.discount_type=='flat' %}selected{% endif %}>Flat (Rs.)</option>
+          </select>
+        </div>
+        <div class="col-md-4"><label class="form-label">Discount Value</label><input type="number" name="discount_value" class="form-control lib-input" value="{{ payment.discount_value }}" min="0" step="0.01" id="edv"></div>
+        <div class="col-md-4"><label class="form-label">Reason</label><input type="text" name="discount_reason" class="form-control lib-input" value="{{ payment.discount_reason }}"></div>
+        <div class="col-md-6"><label class="form-label">Payment Mode</label>
+          <div class="payment-mode-toggle">
+            <label class="mode-option {% if payment.payment_mode=='Offline' %}active{% endif %}"><input type="radio" name="payment_mode" value="Offline" {% if payment.payment_mode=='Offline' %}checked{% endif %} onchange="toggleET()"><span><i class="bi bi-cash me-2"></i>Offline</span></label>
+            <label class="mode-option {% if payment.payment_mode=='Online' %}active{% endif %}"><input type="radio" name="payment_mode" value="Online" {% if payment.payment_mode=='Online' %}checked{% endif %} onchange="toggleET()"><span><i class="bi bi-phone me-2"></i>Online</span></label>
+          </div>
+        </div>
+        <div class="col-md-6" id="etDiv" {% if payment.payment_mode!='Online' %}style="display:none"{% endif %}>
+          <label class="form-label">Transaction ID</label><input type="text" name="transaction_id" class="form-control lib-input" value="{{ payment.transaction_id or '' }}" id="etField">
+        </div>
+        <div class="col-12 d-flex gap-3">
+          <button type="submit" class="btn btn-primary lib-btn px-5">Save Changes</button>
+          <a href="{{ url_for('main.admin_students') }}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+      </div>
+    </form>
+  </div>
+</div></div>
+{% endblock %}
+{% block scripts %}
+<script>
+function toggleED() { const v = document.getElementById('edt').value; document.getElementById('edv').disabled = (v==='none'); }
+function toggleET() { const on = document.querySelector('input[name="payment_mode"][value="Online"]').checked; document.getElementById('etDiv').style.display = on?'block':'none'; }
+toggleED();
+</script>
+{% endblock %}

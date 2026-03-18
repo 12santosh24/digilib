@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard - SHIVA INFOTECH DIGITAL LIBRARY{% endblock %}
+{% block content %}
+<h4 class="lib-page-title mb-4"><i class="bi bi-speedometer2 me-2"></i>Admin Dashboard</h4>
+{% if due_reminders %}
+  {% set ov = due_reminders|selectattr('status','equalto','Overdue')|list %}
+  {% if ov|length > 0 %}
+  <div class="alert alert-danger lib-alert mb-3 d-flex justify-content-between align-items-center">
+    <span><i class="bi bi-bell-fill me-2"></i><strong>{{ ov|length }} student(s)</strong> have OVERDUE monthly fees!</span>
+    <a href="{{ url_for('main.admin_reminders') }}" class="btn btn-sm btn-danger">View Reminders</a>
+  </div>
+  {% endif %}
+  {% set pn = due_reminders|selectattr('status','equalto','Pending')|list %}
+  {% if pn|length > 0 %}
+  <div class="alert alert-warning lib-alert mb-3 d-flex justify-content-between align-items-center">
+    <span><i class="bi bi-clock me-2"></i><strong>{{ pn|length }} student(s)</strong> have monthly renewal due.</span>
+    <a href="{{ url_for('main.admin_reminders') }}" class="btn btn-sm btn-warning">View Reminders</a>
+  </div>
+  {% endif %}
+{% endif %}
+<div class="row g-4 mb-4">
+  <div class="col-6 col-md-3"><div class="stat-card stat-blue"><div class="stat-icon"><i class="bi bi-grid-3x3"></i></div><div class="stat-value">{{ stats.total_seats }}</div><div class="stat-label">Total Seats</div></div></div>
+  <div class="col-6 col-md-3"><div class="stat-card stat-purple"><div class="stat-icon"><i class="bi bi-people-fill"></i></div><div class="stat-value">{{ stats.total_students }}</div><div class="stat-label">Students</div></div></div>
+  <div class="col-6 col-md-3"><div class="stat-card stat-amber"><div class="stat-icon"><i class="bi bi-cash-stack"></i></div><div class="stat-value">Rs.{{ stats.total_revenue|int }}</div><div class="stat-label">Revenue</div></div></div>
+  <div class="col-6 col-md-3"><div class="stat-card stat-red"><div class="stat-icon"><i class="bi bi-bell-fill"></i></div><div class="stat-value">{{ stats.pending_reminders }}</div><div class="stat-label">Pending Fees</div></div></div>
+</div>
+<div class="row g-4">
+  <div class="col-md-8">
+    <div class="lib-card">
+      <h5 class="lib-card-title mb-3"><i class="bi bi-clock-history me-2"></i>Shift Occupancy</h5>
+      {% for s in stats.shift_stats %}
+      <div class="shift-row">
+        <div class="shift-label"><span class="shift-name">{{ s.name }}</span><span class="shift-time text-muted">{{ s.time }}</span></div>
+        <div class="shift-bar-wrap"><div class="progress lib-progress"><div class="progress-bar {% if s.percent>75 %}bg-danger{% elif s.percent>40 %}bg-warning{% else %}bg-success{% endif %}" style="width:{{ s.percent }}%"></div></div></div>
+        <div class="shift-stats"><span class="badge-occupied">{{ s.occupied }}</span><span class="badge-avail">{{ s.available }}</span></div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="lib-card">
+      <h5 class="lib-card-title mb-3"><i class="bi bi-lightning me-2"></i>Quick Actions</h5>
+      <div class="d-grid gap-2">
+        <a href="{{ url_for('main.register') }}" class="btn btn-primary lib-btn"><i class="bi bi-person-plus me-2"></i>New Registration</a>
+        <a href="{{ url_for('main.admin_students') }}" class="btn btn-outline-primary"><i class="bi bi-people me-2"></i>Students</a>
+        <a href="{{ url_for('main.admin_reminders') }}" class="btn btn-outline-warning"><i class="bi bi-bell me-2"></i>Fee Reminders {% if stats.pending_reminders > 0 %}<span class="badge bg-danger ms-1">{{ stats.pending_reminders }}</span>{% endif %}</a>
+        <a href="{{ url_for('main.admin_notifications') }}" class="btn btn-outline-success"><i class="bi bi-whatsapp me-2"></i>Notifications</a>
+        <a href="{{ url_for('main.admin_revenue') }}" class="btn btn-outline-secondary"><i class="bi bi-cash me-2"></i>Revenue</a>
+        <a href="{{ url_for('main.export_excel') }}" class="btn btn-outline-dark"><i class="bi bi-file-earmark-excel me-2"></i>Export Excel</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

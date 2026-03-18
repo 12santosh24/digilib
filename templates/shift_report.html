@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Shift Report - SHIVA INFOTECH DIGITAL LIBRARY{% endblock %}
+{% block content %}
+<h4 class="lib-page-title mb-4"><i class="bi bi-bar-chart me-2"></i>Shift Occupancy Report</h4>
+{% for r in report %}
+<div class="lib-card mb-4">
+  <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <h5 class="lib-card-title mb-0">{{ r.shift.name }} <span class="text-muted small">({{ r.shift.start_time }} - {{ r.shift.end_time }})</span></h5>
+    <div><span class="badge bg-danger me-2">{{ r.occupied }} Occupied</span><span class="badge bg-success">{{ r.available }} Available</span></div>
+  </div>
+  <div class="progress lib-progress mb-3" style="height:16px;">
+    <div class="progress-bar bg-danger" style="width:{{ (r.occupied/92*100)|round }}%">{{ r.occupied }}</div>
+    <div class="progress-bar bg-success" style="width:{{ (r.available/92*100)|round }}%">{{ r.available }}</div>
+  </div>
+  {% if r.bookings %}
+  <div class="table-responsive"><table class="table lib-table table-sm mb-0">
+    <thead><tr><th>Student</th><th>Mobile</th><th>Seat</th></tr></thead>
+    <tbody>
+      {% for b in r.bookings %}
+      <tr><td>{{ b.student.name }}</td><td>{{ b.student.mobile }}</td><td><span class="badge bg-primary">Seat {{ b.seat.seat_number }}</span></td></tr>
+      {% endfor %}
+    </tbody>
+  </table></div>
+  {% else %}<p class="text-muted">No bookings for this shift.</p>{% endif %}
+</div>
+{% endfor %}
+{% endblock %}

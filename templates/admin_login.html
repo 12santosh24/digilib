@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Admin Login - SHIVA INFOTECH DIGITAL LIBRARY{% endblock %}
+{% block content %}
+<div class="row justify-content-center mt-5">
+  <div class="col-md-4">
+    <div class="lib-card text-center">
+      <div class="login-icon mb-3"><i class="bi bi-shield-lock-fill"></i></div>
+      <h4 class="lib-card-title mb-4">Admin Login</h4>
+      <form method="POST">
+        <div class="mb-3 text-start"><label class="form-label">Username</label><input type="text" name="username" class="form-control lib-input" required></div>
+        <div class="mb-4 text-start"><label class="form-label">Password</label><input type="password" name="password" class="form-control lib-input" required></div>
+        <button type="submit" class="btn btn-primary lib-btn w-100"><i class="bi bi-box-arrow-in-right me-2"></i>Login</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

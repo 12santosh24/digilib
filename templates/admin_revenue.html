@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Revenue - SHIVA INFOTECH DIGITAL LIBRARY{% endblock %}
+{% block content %}
+<h4 class="lib-page-title mb-4"><i class="bi bi-cash-stack me-2"></i>Revenue Report</h4>
+<div class="row g-4 mb-4">
+  <div class="col-6 col-md-3"><div class="stat-card stat-green"><div class="stat-icon"><i class="bi bi-check-circle-fill"></i></div><div class="stat-value">Rs.{{ total_paid|int }}</div><div class="stat-label">Collected</div></div></div>
+  <div class="col-6 col-md-3"><div class="stat-card stat-teal"><div class="stat-icon"><i class="bi bi-arrow-repeat"></i></div><div class="stat-value">Rs.{{ renewal_revenue|int }}</div><div class="stat-label">Renewals</div></div></div>
+  <div class="col-6 col-md-3"><div class="stat-card stat-red"><div class="stat-icon"><i class="bi bi-hourglass"></i></div><div class="stat-value">Rs.{{ total_unpaid|int }}</div><div class="stat-label">Pending</div></div></div>
+  <div class="col-6 col-md-3"><div class="stat-card stat-purple"><div class="stat-icon"><i class="bi bi-scissors"></i></div><div class="stat-value">Rs.{{ total_discount|int }}</div><div class="stat-label">Discounts</div></div></div>
+</div>
+<div class="row g-4">
+  <div class="col-lg-8"><div class="lib-card p-0">
+    <div class="table-responsive"><table class="table lib-table mb-0">
+      <thead><tr><th>Receipt</th><th>Student</th><th>Base</th><th>Discount</th><th>Final</th><th>Mode</th><th>Status</th><th>Date</th></tr></thead>
+      <tbody>
+        {% for p in payments %}
+        <tr>
+          <td><code class="small">{{ p.receipt_number }}</code></td><td>{{ p.student.name }}</td>
+          <td>Rs.{{ p.original_amount|int }}</td>
+          <td>{% if p.discount_amount>0 %}<span class="text-danger">-Rs.{{ p.discount_amount|round(2) }}</span>{% else %}-{% endif %}</td>
+          <td><strong>Rs.{{ p.final_amount|round(2) }}</strong></td>
+          <td><span class="badge {% if p.payment_mode=='Online' %}bg-primary{% else %}bg-secondary{% endif %}">{{ p.payment_mode }}</span></td>
+          <td><span class="badge {% if p.status=='Paid' %}bg-success{% else %}bg-danger{% endif %}">{{ p.status }}</span></td>
+          <td class="small">{% if p.payment_date %}{{ p.payment_date.strftime('%d %b %Y') }}{% else %}-{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table></div>
+  </div></div>
+  <div class="col-lg-4">
+    <div class="lib-card"><h6 class="lib-card-title">Daily Collection</h6>
+      {% for day in daily %}<div class="daily-row"><span class="small">{{ day.day }}</span><strong class="text-success">Rs.{{ day.total|int }}</strong></div>{% else %}<p class="text-muted small">No collections yet.</p>{% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

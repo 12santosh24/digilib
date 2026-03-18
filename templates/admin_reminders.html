@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Fee Reminders - SHIVA INFOTECH DIGITAL LIBRARY{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <h4 class="lib-page-title"><i class="bi bi-bell me-2"></i>Monthly Fee Reminders</h4>
+  <div class="d-flex gap-2 flex-wrap">
+    <form method="POST" action="{{ url_for('main.send_all_reminders') }}" class="d-inline">
+      <button class="btn btn-success btn-sm lib-btn"><i class="bi bi-whatsapp me-1"></i>Send All WhatsApp/SMS</button>
+    </form>
+    <span class="badge bg-danger px-3 py-2">{{ reminders|selectattr('status','equalto','Overdue')|list|length }} Overdue</span>
+    <span class="badge bg-warning text-dark px-3 py-2">{{ reminders|selectattr('status','equalto','Pending')|list|length }} Pending</span>
+    <span class="badge bg-success px-3 py-2">{{ reminders|selectattr('status','equalto','Paid')|list|length }} Paid</span>
+  </div>
+</div>
+{% set overdue = reminders|selectattr('status','equalto','Overdue')|list %}
+{% if overdue %}
+<div class="alert alert-danger lib-alert mb-4"><i class="bi bi-exclamation-triangle-fill me-2"></i><strong>{{ overdue|length }} student(s) have overdue fees!</strong></div>
+{% endif %}
+<div class="lib-card p-0">
+  <div class="table-responsive">
+    <table class="table lib-table mb-0">
+      <thead><tr><th>Student</th><th>Mobile</th><th>Month</th><th>Due Date</th><th>Amount</th><th>Status</th><th>Notified</th><th>Actions</th></tr></thead>
+      <tbody>
+        {% for r in reminders %}
+        <tr class="{% if r.status=='Overdue' %}table-danger{% elif r.status=='Pending' %}table-warning{% elif r.status=='Paid' %}table-success{% endif %}">
+          <td><strong>{{ r.student.name }}</strong></td>
+          <td>{{ r.student.mobile }}</td>
+          <td>Month {{ r.month_number }}</td>
+          <td>{{ r.due_date.strftime('%d %b %Y') }} {% if r.status=='Overdue' %}<span class="badge bg-danger">OVERDUE</span>{% endif %}</td>
+          <td>Rs.{{ r.renewal_amount|int if r.renewal_amount else 0 }}</td>
+          <td><span class="badge {% if r.status=='Paid' %}bg-success{% elif r.status=='Overdue' %}bg-danger{% else %}bg-warning text-dark{% endif %}">{{ r.status }}</span>
+            {% if r.status=='Paid' and r.payment_mode %}<span class="badge {% if r.payment_mode=='Online' %}bg-primary{% else %}bg-secondary{% endif %} ms-1">{{ r.payment_mode }}</span>{% endif %}
+          </td>
+          <td>
+            {% if r.whatsapp_sent %}<span class="badge bg-success me-1"><i class="bi bi-whatsapp"></i></span>{% endif %}
+            {% if r.sms_sent %}<span class="badge bg-info"><i class="bi bi-chat-text"></i></span>{% endif %}
+            {% if not r.whatsapp_sent and not r.sms_sent %}<span class="text-muted small">Not sent</span>{% endif %}
+          </td>
+          <td>
+            {% if r.status in ['Pending','Overdue'] %}
+            <div class="d-flex gap-1">
+              <a href="{{ url_for('main.collect_renewal', rid=r.id) }}" class="btn btn-xs btn-success"><i class="bi bi-cash-coin me-1"></i>Collect</a>
+              <form method="POST" action="{{ url_for('main.send_one_reminder', rid=r.id) }}" class="d-inline">
+                <button class="btn btn-xs btn-primary" title="Send WhatsApp/SMS"><i class="bi bi-whatsapp"></i></button>
+              </form>
+              <form method="POST" action="{{ url_for('main.waive_reminder', rid=r.id) }}" class="d-inline">
+                <button class="btn btn-xs btn-outline-secondary" onclick="return confirm('Waive?')"><i class="bi bi-x"></i></button>
+              </form>
+            </div>
+            {% elif r.status=='Paid' %}
+            <span class="text-success small"><i class="bi bi-check-circle-fill"></i> Collected</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8" class="text-center text-muted py-4">No reminders yet. They appear after 1 month from admission.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

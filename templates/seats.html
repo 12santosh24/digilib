@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Seat Map - SHIVA INFOTECH DIGITAL LIBRARY{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <h4 class="lib-page-title"><i class="bi bi-grid-3x3 me-2"></i>Seat Map</h4>
+  <div class="d-flex gap-3">
+    <span class="legend-dot green"></span><span class="legend-label me-3">Available</span>
+    <span class="legend-dot red"></span><span class="legend-label">Occupied</span>
+  </div>
+</div>
+<div class="shift-tabs mb-4">
+  {% for shift in shifts %}
+  <a href="{{ url_for('main.seats', shift_id=shift.id) }}" class="shift-tab {% if selected_shift.id==shift.id %}active{% endif %}">
+    <i class="bi bi-clock me-1"></i>{{ shift.name }}<span class="shift-time-small">{{ shift.start_time }}-{{ shift.end_time }}</span>
+  </a>
+  {% endfor %}
+</div>
+<div class="lib-card"><div class="seat-grid">
+  {% for seat in seats %}
+  <div class="seat-cell {{ seat.status }}"
+    {% if seat.student %}data-bs-toggle="modal" data-bs-target="#seatModal"
+    data-seat="{{ seat.number }}" data-name="{{ seat.student.name }}" data-mobile="{{ seat.student.mobile }}"
+    data-shift="{{ seat.student.shift }}" data-payment="{{ seat.student.payment }}"
+    data-receipt="{{ seat.student.receipt }}" data-mode="{{ seat.student.mode }}"{% endif %}
+    title="Seat {{ seat.number }} - {{ seat.status }}">
+    <span class="seat-num">{{ seat.number }}</span>
+    <span class="seat-status-dot"></span>
+  </div>
+  {% endfor %}
+</div></div>
+<div class="modal fade" id="seatModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content lib-modal">
+      <div class="modal-header"><h5 class="modal-title"><i class="bi bi-person-badge me-2"></i>Seat <span id="mSeat"></span></h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <div class="student-info-row"><i class="bi bi-person-fill"></i><span id="mName"></span></div>
+        <div class="student-info-row"><i class="bi bi-phone-fill"></i><span id="mMobile"></span></div>
+        <div class="student-info-row"><i class="bi bi-clock-fill"></i><span id="mShift"></span></div>
+        <div class="student-info-row"><i class="bi bi-cash"></i><span id="mPayment" class="badge"></span></div>
+        <div class="student-info-row"><i class="bi bi-phone"></i><span id="mMode"></span></div>
+        <div class="student-info-row"><i class="bi bi-receipt"></i><span id="mReceipt"></span></div>
+      </div>
+      <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Close</button></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('seatModal').addEventListener('show.bs.modal', function(e) {
+  const b = e.relatedTarget;
+  document.getElementById('mSeat').textContent    = b.dataset.seat;
+  document.getElementById('mName').textContent    = b.dataset.name;
+  document.getElementById('mMobile').textContent  = b.dataset.mobile;
+  document.getElementById('mShift').textContent   = b.dataset.shift;
+  document.getElementById('mMode').textContent    = b.dataset.mode;
+  document.getElementById('mReceipt').textContent = b.dataset.receipt;
+  const pb = document.getElementById('mPayment');
+  pb.textContent = b.dataset.payment;
+  pb.className   = 'badge ' + (b.dataset.payment === 'Paid' ? 'bg-success' : 'bg-danger');
+});
+</script>
+{% endblock %}

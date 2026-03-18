@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Receipt - SHIVA INFOTECH DIGITAL LIBRARY{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+    <div class="receipt-card">
+      <div class="receipt-header">
+        <div class="receipt-logo"><i class="bi bi-building-fill"></i></div>
+        <h3 class="receipt-title">SHIVA INFOTECH DIGITAL LIBRARY</h3>
+        <p class="receipt-sub">Digital Library Management System</p>
+        <div class="receipt-number">Receipt: {{ payment.receipt_number }}</div>
+      </div>
+      <div class="receipt-body">
+        <div class="receipt-row"><span>Student Name</span><strong>{{ student.name }}</strong></div>
+        <div class="receipt-row"><span>Mobile</span><strong>+91 {{ student.mobile }}</strong></div>
+        <div class="receipt-row"><span>Date of Birth</span><strong>{{ student.dob.strftime('%d %b %Y') }}</strong></div>
+        <div class="receipt-row"><span>Registered On</span><strong>{{ student.registered_at.strftime('%d %b %Y, %I:%M %p') }}</strong></div>
+        <hr>
+        <h6 class="fw-bold mb-3">Bookings</h6>
+        {% for booking in bookings %}
+        <div class="receipt-booking">
+          <div><strong>{{ booking.shift.name }}</strong><div class="text-muted small">{{ booking.shift.start_time }} to {{ booking.shift.end_time }}</div></div>
+          <div class="seat-pill">Seat {{ booking.seat.seat_number }}</div>
+        </div>
+        {% endfor %}
+        <hr>
+        <h6 class="fw-bold mb-3">Fee Details</h6>
+        <div class="receipt-row"><span>Base Fee</span><span>Rs.{{ payment.original_amount|int }}</span></div>
+        {% if payment.discount_type != 'none' and payment.discount_amount > 0 %}
+        <div class="receipt-row text-danger">
+          <span>Discount ({{ payment.discount_display() }}{% if payment.discount_reason %} - {{ payment.discount_reason }}{% endif %})</span>
+          <span>- Rs.{{ payment.discount_amount|round(2) }}</span>
+        </div>
+        {% endif %}
+        <div class="receipt-row receipt-total"><span>Amount Payable</span><strong class="text-success fs-5">Rs.{{ payment.final_amount|round(2) }}</strong></div>
+        <div class="receipt-row"><span>Payment Mode</span>
+          <span class="badge {% if payment.payment_mode=='Online' %}bg-primary{% else %}bg-secondary{% endif %} px-3 py-2">
+            <i class="bi bi-{% if payment.payment_mode=='Online' %}phone{% else %}cash{% endif %} me-1"></i>{{ payment.payment_mode }}
+          </span>
+        </div>
+        {% if payment.transaction_id %}<div class="receipt-row"><span>Transaction ID</span><code>{{ payment.transaction_id }}</code></div>{% endif %}
+        <div class="receipt-row">
+          <span>Payment Status</span>
+          <div class="d-flex align-items-center gap-2">
+            <span class="badge {% if payment.status=='Paid' %}bg-success{% else %}bg-danger{% endif %} px-3 py-2 fs-6">
+              <i class="bi bi-{% if payment.status=='Paid' %}check-circle{% else %}x-circle{% endif %} me-1"></i>{{ payment.status }}
+            </span>
+            {% if payment.status=='Unpaid' %}
+            <form method="POST" action="{{ url_for('main.update_payment', student_id=student.id) }}" class="d-inline">
+              <button type="submit" class="btn btn-success btn-sm px-3" onclick="return confirm('Mark as Paid?')"><i class="bi bi-check-lg me-1"></i>Mark as Paid</button>
+            </form>
+            {% elif payment.payment_date %}
+            <small class="text-muted">on {{ payment.payment_date.strftime('%d %b %Y') }}</small>
+            {% endif %}
+          </div>
+        </div>
+        {% if payment.next_due_date %}<div class="receipt-row"><span>Next Renewal Due</span><strong class="text-warning">{{ payment.next_due_date.strftime('%d %b %Y') }}</strong></div>{% endif %}
+      </div>
+      {% if payment.status=='Unpaid' %}
+      <div class="receipt-unpaid-warning"><i class="bi bi-exclamation-triangle-fill me-2"></i><strong>Payment Pending!</strong> Collect Rs.{{ payment.final_amount|round(2) }} and click "Mark as Paid" above.</div>
+      {% else %}
+      <div class="receipt-paid-confirm"><i class="bi bi-shield-check me-2"></i><strong>Payment Confirmed!</strong> Rs.{{ payment.final_amount|round(2) }} received via {{ payment.payment_mode }}.</div>
+      {% endif %}
+      <div class="receipt-footer">
+        <p class="mb-3">Thank you for choosing SHIVA INFOTECH DIGITAL LIBRARY!</p>
+        <div class="d-flex gap-2 justify-content-center flex-wrap">
+          <a href="{{ url_for('main.index') }}" class="btn btn-primary lib-btn"><i class="bi bi-house me-2"></i>Dashboard</a>
+          <a href="{{ url_for('main.register') }}" class="btn btn-outline-secondary"><i class="bi bi-person-plus me-2"></i>New Registration</a>
+          <button onclick="window.print()" class="btn btn-outline-dark"><i class="bi bi-printer me-2"></i>Print</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

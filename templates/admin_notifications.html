@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Notifications - SHIVA INFOTECH DIGITAL LIBRARY{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <h4 class="lib-page-title"><i class="bi bi-whatsapp me-2"></i>Notification Logs</h4>
+</div>
+
+<!-- Test notification -->
+<div class="lib-card mb-4">
+  <h6 class="lib-card-title mb-3"><i class="bi bi-send me-2"></i>Send Test Message</h6>
+  <form method="POST" action="{{ url_for('main.test_notification') }}" class="row g-3 align-items-end">
+    <div class="col-md-4">
+      <label class="form-label">Mobile Number (10 digits)</label>
+      <div class="input-group"><span class="input-group-text">+91</span><input type="text" name="mobile" class="form-control lib-input" placeholder="9876543210" maxlength="10" required></div>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Channel</label>
+      <select name="channel" class="form-select lib-input">
+        <option value="whatsapp">WhatsApp (Twilio)</option>
+        <option value="sms">SMS (Twilio)</option>
+        <option value="fast2sms">SMS (Fast2SMS)</option>
+      </select>
+    </div>
+    <div class="col-md-4">
+      <button type="submit" class="btn btn-success lib-btn w-100"><i class="bi bi-send me-2"></i>Send Test</button>
+    </div>
+  </form>
+  <div class="mt-3 p-3 bg-light rounded small">
+    <strong>Setup Guide:</strong><br>
+    <i class="bi bi-whatsapp text-success me-1"></i><strong>WhatsApp/SMS via Twilio:</strong> Sign up free at <a href="https://twilio.com" target="_blank">twilio.com</a> - set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_WHATSAPP env vars<br>
+    <i class="bi bi-chat-text text-primary me-1"></i><strong>SMS via Fast2SMS (India):</strong> Rs.10 = 500 SMS at <a href="https://fast2sms.com" target="_blank">fast2sms.com</a> - set FAST2SMS_API_KEY env var
+  </div>
+</div>
+
+<!-- Log table -->
+<div class="lib-card p-0">
+  <div class="table-responsive">
+    <table class="table lib-table mb-0">
+      <thead><tr><th>Student</th><th>Mobile</th><th>Channel</th><th>Type</th><th>Status</th><th>Sent At</th></tr></thead>
+      <tbody>
+        {% for log in logs %}
+        <tr>
+          <td>{{ log.student.name if log.student else 'Test' }}</td>
+          <td>{{ log.mobile }}</td>
+          <td>
+            <span class="badge {% if log.channel=='whatsapp' %}bg-success{% else %}bg-primary{% endif %}">
+              <i class="bi bi-{% if log.channel=='whatsapp' %}whatsapp{% else %}chat-text{% endif %} me-1"></i>{{ log.channel|upper }}
+            </span>
+          </td>
+          <td><span class="badge bg-secondary">{{ log.message_type }}</span></td>
+          <td>
+            <span class="badge {% if log.status=='sent' %}bg-success{% elif log.status=='skipped' %}bg-warning text-dark{% else %}bg-danger{% endif %}">{{ log.status }}</span>
+            {% if log.error_message %}<div class="text-danger small">{{ log.error_message[:60] }}</div>{% endif %}
+          </td>
+          <td class="small text-muted">{{ log.sent_at.strftime('%d %b %Y, %I:%M %p') }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" class="text-center text-muted py-4">No notifications sent yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
